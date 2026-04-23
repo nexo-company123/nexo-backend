@@ -2,7 +2,6 @@ package pl.edu.uj.tp.nexo.organization.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.edu.uj.tp.nexo.organization.dto.CreateOrganizationRequest;
 import pl.edu.uj.tp.nexo.organization.dto.OrganizationResponse;
 import pl.edu.uj.tp.nexo.organization.dto.UpdateOrganizationRequest;
 import pl.edu.uj.tp.nexo.organization.entity.Organization;
@@ -29,13 +28,6 @@ public class OrganizationService {
         return organizationRepository.findById(id)
                 .map(this::toOrganizationResponse)
                 .orElseThrow(() -> new OrganizationNotFoundException(id));
-    }
-
-    public OrganizationResponse createOrganization(CreateOrganizationRequest request) {
-        Organization organization = new Organization();
-        organization.setName(request.getName());
-        organization = organizationRepository.save(organization);
-        return toOrganizationResponse(organization);
     }
 
     public OrganizationResponse updateOrganization(Long id, UpdateOrganizationRequest request) {

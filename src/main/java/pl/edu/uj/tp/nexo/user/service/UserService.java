@@ -5,10 +5,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.edu.uj.tp.nexo.organization.repository.OrganizationRepository;
 import pl.edu.uj.tp.nexo.organization.service.OrganizationNotFoundException;
-import pl.edu.uj.tp.nexo.user.dto.CreateUserRequest;
 import pl.edu.uj.tp.nexo.user.dto.UpdateUserRequest;
 import pl.edu.uj.tp.nexo.user.dto.UserResponse;
-import pl.edu.uj.tp.nexo.user.entity.Role;
 import pl.edu.uj.tp.nexo.user.entity.User;
 import pl.edu.uj.tp.nexo.user.repository.UserRepository;
 import pl.edu.uj.tp.nexo.validation.UserDataValidator;
@@ -44,23 +42,6 @@ public class UserService {
         return userRepository.findById(id)
                 .map(this::toUserResponse)
                 .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    public UserResponse createUser(CreateUserRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException(request.getEmail());
-        }
-
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .role(Role.USER)
-                .build();
-
-        user = userRepository.save(user);
-        return toUserResponse(user);
     }
 
     public UserResponse updateUser(Long id, UpdateUserRequest request) {

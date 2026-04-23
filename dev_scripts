@@ -1,0 +1,7 @@
+sudo docker rm -f 9412b030b289
+
+sudo docker ps -a | grep nexo | awk '{print $1}' | xargs -r sudo docker rm -f
+
+sudo docker network prune -f
+
+sudo docker-compose up --build
