@@ -61,16 +61,9 @@ public class IssueService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        // Fetch using the specification and map to your response DTO
         return issueRepository.findAll(spec).stream()
-                .map(this::toIssueResponse) // Make sure this matches your actual mapper method name!
-                .toList();
-    }
-
-    public List<IssueResponse> getIssues() {
-        return issueRepository.findAll().stream()
                 .map(this::toIssueResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<IssueResponse> getIssuesByOrganization(Long organizationId) {
@@ -82,19 +75,21 @@ public class IssueService {
                 .collect(Collectors.toList());
     }
 
-    public IssueResponse getIssueById(Long id) {
-        return issueRepository.findById(id)
+    public IssueResponse getIssueByIdAndOrganization(Long id, Long organizationId) {
+        return issueRepository.findByIdAndOrganizationId(id, organizationId)
                 .map(this::toIssueResponse)
                 .orElseThrow(() -> new IssueNotFoundException(id));
     }
 
-    public IssueResponse createIssue(CreateIssueRequest request) {
+    public IssueResponse createIssue(CreateIssueRequest request, Long organizationId) {
         var reporter = userRepository.findById(request.getReporterId()).orElseThrow(() -> new UserNotFoundException(request.getReporterId()));
         var assignee = request.getAssigneeId() != null ? userRepository.findById(request.getAssigneeId()).orElseThrow(() -> new UserNotFoundException(request.getAssigneeId())) : null;
         var board = boardRepository.findById(request.getBoardId()).orElseThrow(() -> new BoardNotFoundException(request.getBoardId()));
         var stage = stageRepository.findById(request.getStageId()).orElseThrow(() -> new StageNotFoundException(request.getStageId()));
-        var organization = organizationRepository.findById(request.getOrganizationId()).orElseThrow(() -> new OrganizationNotFoundException(request.getOrganizationId()));
-        var epic = request.getEpicId() != null ? issueRepository.findById(request.getEpicId()).orElseThrow(() -> new IssueNotFoundException(request.getEpicId())) : null;
+
+        var organization = organizationRepository.findById(organizationId).orElseThrow(() -> new OrganizationNotFoundException(organizationId));
+
+        var epic = request.getEpicId() != null ? issueRepository.findByIdAndOrganizationId(request.getEpicId(), organizationId).orElseThrow(() -> new IssueNotFoundException(request.getEpicId())) : null;
 
         validateEpicStage(request.getType(), stage);
 
@@ -119,8 +114,9 @@ public class IssueService {
         return toIssueResponse(issue);
     }
 
-    public IssueResponse updateIssue(Long id, UpdateIssueRequest request) {
-        Issue issue = issueRepository.findById(id)
+    public IssueResponse updateIssue(Long id, UpdateIssueRequest request, Long organizationId) {
+        // Strict fetch: will fail if the issue doesn't belong to the user's organization
+        Issue issue = issueRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new IssueNotFoundException(id));
 
         if (request.getTitle() != null) {
@@ -143,14 +139,14 @@ public class IssueService {
         if (request.getPriority() != null) {
             issue.setPriority(request.getPriority());
         }
-        
+
         issue.setFlag(request.isFlag());
 
         if (request.getType() != null) {
             issue.setType(request.getType());
         }
         if (request.getEpicId() != null) {
-            var epic = issueRepository.findById(request.getEpicId())
+            var epic = issueRepository.findByIdAndOrganizationId(request.getEpicId(), organizationId)
                     .orElseThrow(() -> new IssueNotFoundException(request.getEpicId()));
             issue.setEpic(epic);
         }
@@ -171,11 +167,12 @@ public class IssueService {
         return toIssueResponse(issue);
     }
 
-    public void deleteIssue(Long id) {
-        if (!issueRepository.existsById(id)) {
-            throw new IssueNotFoundException(id);
-        }
-        issueRepository.deleteById(id);
+    public void deleteIssue(Long id, Long organizationId) {
+        // Fetch to ensure it belongs to the organization before deleting
+        Issue issue = issueRepository.findByIdAndOrganizationId(id, organizationId)
+                .orElseThrow(() -> new IssueNotFoundException(id));
+
+        issueRepository.delete(issue);
     }
 
     private void validateEpicStage(pl.edu.uj.tp.nexo.issue.entity.IssueType type, Stage stage) {

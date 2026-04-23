@@ -172,7 +172,7 @@
 					"name": "Get All Users",
 					"request": {
 						"method": "GET",
-						"description": "Retrieves a list of all users in the system. (Requires ADMIN role)",
+						"description": "Retrieves a list of all users in the authenticated user's organization.",
 						"header": [
 							{
 								"key": "Authorization",
@@ -187,36 +187,6 @@
 							"path": [
 								"api",
 								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Users by Organization",
-					"request": {
-						"method": "GET",
-						"description": "Retrieves a list of all users belonging to a specific organization. (Requires ADMIN role)",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/users?organizationId={{organizationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users"
-							],
-							"query": [
-								{
-									"key": "organizationId",
-									"value": "{{organizationId}}"
-								}
 							]
 						}
 					},
@@ -344,7 +314,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"title\": \"Implement login page\",\n  \"description\": \"Create a responsive login page using React.\",\n  \"acceptanceCriteria\": \"User can login with email and password.\",\n  \"reporterId\": 1,\n  \"assigneeId\": 1,\n  \"storyPoints\": 5,\n  \"priority\": \"HIGH\",\n  \"type\": \"TASK\",\n  \"startDate\": \"2023-10-26T10:00:00\",\n  \"deadline\": \"2023-11-02T18:00:00\",\n  \"boardId\": 1,\n  \"stageId\": 1,\n  \"organizationId\": 1\n}"
+							"raw": "{\n  \"title\": \"Implement login page\",\n  \"description\": \"Create a responsive login page using React.\",\n  \"acceptanceCriteria\": \"User can login with email and password.\",\n  \"reporterId\": 1,\n  \"assigneeId\": 1,\n  \"storyPoints\": 5,\n  \"priority\": \"HIGH\",\n  \"type\": \"TASK\",\n  \"startDate\": \"2023-10-26T10:00:00\",\n  \"deadline\": \"2023-11-02T18:00:00\",\n  \"boardId\": 1,\n  \"stageId\": 1\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/issues",
@@ -363,7 +333,7 @@
 					"name": "Get All Issues",
 					"request": {
 						"method": "GET",
-						"description": "Retrieves all issues. Supports filtering by organizationId, boardId, stageId, assigneeId, and searching by title.",
+						"description": "Retrieves all issues in the organization. Supports filtering by boardId, stageId, assigneeId, and searching by title.",
 						"header": [
 							{
 								"key": "Authorization",
@@ -371,7 +341,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/issues?organizationId={{organizationId}}&boardId={{boardId}}&stageId={{stageId}}&assigneeId={{userId}}&search=login",
+							"raw": "{{baseUrl}}/api/issues?boardId={{boardId}}&stageId={{stageId}}&assigneeId={{userId}}&search=login",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -380,10 +350,6 @@
 								"issues"
 							],
 							"query": [
-								{
-									"key": "organizationId",
-									"value": "{{organizationId}}"
-								},
 								{
 									"key": "boardId",
 									"value": "{{boardId}}"
@@ -399,36 +365,6 @@
 								{
 									"key": "search",
 									"value": "login"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Issues by Organization",
-					"request": {
-						"method": "GET",
-						"description": "Retrieves all issues associated with a specific organization.",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/issues?organizationId={{organizationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"issues"
-							],
-							"query": [
-								{
-									"key": "organizationId",
-									"value": "{{organizationId}}"
 								}
 							]
 						}
@@ -524,10 +460,10 @@
 			"name": "Organizations",
 			"item": [
 				{
-					"name": "Get All Organizations",
+					"name": "Get My Organization",
 					"request": {
 						"method": "GET",
-						"description": "Retrieves a list of all organizations. (Requires ADMIN role)",
+						"description": "Retrieves details of the authenticated user's organization.",
 						"header": [
 							{
 								"key": "Authorization",
@@ -535,48 +471,24 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/organizations",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"organizations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Organization by ID",
-					"request": {
-						"method": "GET",
-						"description": "Retrieves an organization by its ID. (Requires ADMIN or USER role)",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/organizations/{{organizationId}}",
+							"raw": "{{baseUrl}}/api/organizations/my",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"organizations",
-								"{{organizationId}}"
+								"my"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Update Organization",
+					"name": "Update My Organization",
 					"request": {
 						"method": "PUT",
-						"description": "Updates the name of an existing organization. (Requires ADMIN role)",
+						"description": "Updates the name of the authenticated user's organization. (Requires ADMIN role)",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -592,24 +504,24 @@
 							"raw": "{\n  \"name\": \"Updated Organization Name\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/organizations/{{organizationId}}",
+							"raw": "{{baseUrl}}/api/organizations/my",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"organizations",
-								"{{organizationId}}"
+								"my"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Delete Organization",
+					"name": "Delete My Organization",
 					"request": {
 						"method": "DELETE",
-						"description": "Deletes an organization by its ID. (Requires ADMIN role)",
+						"description": "Permanently deletes the authenticated user's organization. (Requires ADMIN role)",
 						"header": [
 							{
 								"key": "Authorization",
@@ -617,14 +529,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/organizations/{{organizationId}}",
+							"raw": "{{baseUrl}}/api/organizations/my",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"organizations",
-								"{{organizationId}}"
+								"my"
 							]
 						}
 					},
@@ -659,7 +571,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"description": "Creates a new board for an organization.",
+						"description": "Creates a new board for the authenticated user's organization.",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -672,7 +584,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Development Board\",\n  \"organizationId\": {{organizationId}}\n}"
+							"raw": "{\n  \"name\": \"Development Board\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/boards",
@@ -688,10 +600,10 @@
 					"response": []
 				},
 				{
-					"name": "Get Boards by Organization",
+					"name": "Get All Boards",
 					"request": {
 						"method": "GET",
-						"description": "Retrieves all boards associated with a specific organization.",
+						"description": "Retrieves all boards associated with the authenticated user's organization.",
 						"header": [
 							{
 								"key": "Authorization",
@@ -699,19 +611,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/boards?organizationId={{organizationId}}",
+							"raw": "{{baseUrl}}/api/boards",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"boards"
-							],
-							"query": [
-								{
-									"key": "organizationId",
-									"value": "{{organizationId}}"
-								}
 							]
 						}
 					},
@@ -830,11 +736,6 @@
 		},
 		{
 			"key": "issueId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "organizationId",
 			"value": "",
 			"type": "string"
 		},

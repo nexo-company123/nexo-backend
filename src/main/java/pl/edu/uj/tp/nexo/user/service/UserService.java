@@ -3,8 +3,6 @@ package pl.edu.uj.tp.nexo.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.edu.uj.tp.nexo.organization.repository.OrganizationRepository;
-import pl.edu.uj.tp.nexo.organization.service.OrganizationNotFoundException;
 import pl.edu.uj.tp.nexo.user.dto.UpdateUserRequest;
 import pl.edu.uj.tp.nexo.user.dto.UserResponse;
 import pl.edu.uj.tp.nexo.user.entity.User;
@@ -20,32 +18,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final OrganizationRepository organizationRepository;
     private final UserDataValidator userDataValidator;
 
-    public List<UserResponse> getUsers() {
-        return userRepository.findAll().stream()
-                .map(this::toUserResponse)
-                .collect(Collectors.toList());
-    }
-
     public List<UserResponse> getUsersByOrganization(Long organizationId) {
-        if (!organizationRepository.existsById(organizationId)) {
-            throw new OrganizationNotFoundException(organizationId);
-        }
         return userRepository.findAllByOrganizationId(organizationId).stream()
                 .map(this::toUserResponse)
                 .collect(Collectors.toList());
     }
 
-    public UserResponse getUserById(Long id) {
-        return userRepository.findById(id)
+    public UserResponse getUserByIdAndOrganization(Long id, Long organizationId) {
+        return userRepository.findByIdAndOrganizationId(id, organizationId)
                 .map(this::toUserResponse)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    public UserResponse updateUser(Long id, UpdateUserRequest request) {
-        User user = userRepository.findById(id)
+    public UserResponse updateUser(Long id, UpdateUserRequest request, Long organizationId) {
+        User user = userRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
         if (request.getFirstName() != null) {
@@ -68,11 +56,10 @@ public class UserService {
         return toUserResponse(user);
     }
 
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
-        }
-        userRepository.deleteById(id);
+    public void deleteUser(Long id, Long organizationId) {
+        User user = userRepository.findByIdAndOrganizationId(id, organizationId)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        userRepository.delete(user);
     }
 
     private UserResponse toUserResponse(User user) {

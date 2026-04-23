@@ -8,21 +8,12 @@ import pl.edu.uj.tp.nexo.organization.entity.Organization;
 import pl.edu.uj.tp.nexo.organization.repository.OrganizationRepository;
 import pl.edu.uj.tp.nexo.validation.UserDataValidator;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final UserDataValidator userDataValidator;
-
-    public List<OrganizationResponse> getOrganizations() {
-        return organizationRepository.findAll().stream()
-                .map(this::toOrganizationResponse)
-                .collect(Collectors.toList());
-    }
 
     public OrganizationResponse getOrganizationById(Long id) {
         return organizationRepository.findById(id)
