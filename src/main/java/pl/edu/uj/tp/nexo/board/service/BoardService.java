@@ -41,20 +41,23 @@ public class BoardService {
                 .collect(Collectors.toList());
     }
 
-    public BoardResponse getBoardById(Long id) {
-        return boardRepository.findById(id)
+    public BoardResponse getBoardByIdAndOrganization(Long id, Long organizationId) {
+        return boardRepository.findByIdAndOrganizationId(id, organizationId)
                 .map(this::toBoardResponse)
                 .orElseThrow(() -> new BoardNotFoundException(id));
     }
 
     @Transactional
-    public BoardResponse createBoard(CreateBoardRequest request) {
-        var organization = organizationRepository.findById(request.getOrganizationId())
-                .orElseThrow(() -> new OrganizationNotFoundException(request.getOrganizationId()));
+    public BoardResponse createBoard(CreateBoardRequest request, Long organizationId) {
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new OrganizationNotFoundException(organizationId));
 
         List<User> users = new ArrayList<>();
         if (request.getUserIds() != null) {
-            users = userRepository.findAllById(request.getUserIds());
+            // Security check: Only add users that actually belong to the authenticated user's organization
+            users = userRepository.findAllById(request.getUserIds()).stream()
+                    .filter(user -> user.getOrganization() != null && user.getOrganization().getId().equals(organizationId))
+                    .collect(Collectors.toList());
         }
 
         Board board = Board.builder()
@@ -72,13 +75,15 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardResponse updateStage(Long boardId, Long stageId, UpdateStageRequest request) {
-        var board = boardRepository.findById(boardId)
+    public BoardResponse updateStage(Long boardId, Long stageId, UpdateStageRequest request, Long organizationId) {
+        // Strictly fetch the board by organization ID
+        var board = boardRepository.findByIdAndOrganizationId(boardId, organizationId)
                 .orElseThrow(() -> new BoardNotFoundException(boardId));
+
         var stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new StageNotFoundException(stageId));
 
-        if (!stage.getBoard().getId().equals(boardId)) {
+        if (!stage.getBoard().getId().equals(board.getId())) {
             throw new IllegalArgumentException("Stage does not belong to the specified board");
         }
 
@@ -94,11 +99,16 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardResponse addUserToBoard(Long boardId, Long userId) {
-        var board = boardRepository.findById(boardId)
+    public BoardResponse addUserToBoard(Long boardId, Long userId, Long organizationId) {
+        var board = boardRepository.findByIdAndOrganizationId(boardId, organizationId)
                 .orElseThrow(() -> new BoardNotFoundException(boardId));
+
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (user.getOrganization() == null || !user.getOrganization().getId().equals(organizationId)) {
+            throw new UserNotFoundException(userId); // Treat it as not found for security purposes
+        }
 
         if (!board.getUsers().contains(user)) {
             board.getUsers().add(user);
