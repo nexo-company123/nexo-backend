@@ -9,6 +9,8 @@ import pl.edu.uj.tp.nexo.invitation.repository.InvitationRepository;
 import pl.edu.uj.tp.nexo.organization.entity.Organization;
 import pl.edu.uj.tp.nexo.organization.repository.OrganizationRepository;
 import pl.edu.uj.tp.nexo.validation.UserDataValidator;
+import pl.edu.uj.tp.nexo.exception.AppException;
+import pl.edu.uj.tp.nexo.exception.ErrorInfo;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -61,5 +63,23 @@ class InvitationServiceTest {
                 savedInvitation.getToken(),
                 "Nexo Org"
         );
+    }
+
+    @Test
+    void createInvitation_whenOrganizationDoesNotExist_throwsAppExceptionAndDoesNotSendEmail() {
+        InvitationRequest request = new InvitationRequest("user@example.com");
+
+        when(organizationRepository.findById(99L)).thenReturn(Optional.empty());
+
+        AppException exception = assertThrows(
+                AppException.class,
+                () -> invitationService.createInvitation(request, 99L)
+        );
+
+        assertEquals(ErrorInfo.ORGANIZATION_NOT_FOUND, exception.getErrorInfo());
+
+        verify(userDataValidator).validateEmail("user@example.com");
+        verify(invitationRepository, never()).save(any(Invitation.class));
+        verify(emailService, never()).sendInvitationEmail(anyString(), anyString(), anyString());
     }
 }

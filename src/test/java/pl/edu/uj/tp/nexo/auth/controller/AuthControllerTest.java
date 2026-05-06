@@ -21,9 +21,9 @@ class AuthControllerTest {
     void registerAdmin_returnsAuthenticationResponseFromService() {
         AdminRegisterRequest request = new AdminRegisterRequest(
                 "Nexo Org",
-                "Jan",
-                "Kowalski",
-                "jan@example.com",
+                "Aleksander",
+                "Bury",
+                "aleksander.bury@example.com",
                 "password123"
         );
         AuthenticationResponse expectedResponse = new AuthenticationResponse("admin-token");
@@ -42,8 +42,8 @@ class AuthControllerTest {
     void registerInvited_returnsAuthenticationResponseFromService() {
         InvitedRegisterRequest request = new InvitedRegisterRequest(
                 "invitation-token",
-                "Anna",
-                "Nowak",
+                "Mariola",
+                "Kwasniak",
                 "password123"
         );
         AuthenticationResponse expectedResponse = new AuthenticationResponse("invited-token");
@@ -61,7 +61,7 @@ class AuthControllerTest {
     @Test
     void authenticate_returnsAuthenticationResponseFromService() {
         AuthenticationRequest request = new AuthenticationRequest(
-                "anna@example.com",
+                "mariolka@example.com",
                 "password123"
         );
         AuthenticationResponse expectedResponse = new AuthenticationResponse("login-token");
