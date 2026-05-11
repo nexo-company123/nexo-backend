@@ -30,7 +30,7 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Operation(summary = "List boards for an organization", description = "Retrieves all boards belonging to the authenticated user's organization.")
     @ApiErrors({
             ErrorInfo.INVALID_AUTH_TOKEN,
@@ -44,7 +44,7 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Operation(summary = "Get detailed board info", description = "Retrieves information about a specific board. Strictly checks if the board belongs to the user's organization.")
     @ApiErrors({
             ErrorInfo.BOARD_NOT_FOUND,
@@ -77,7 +77,7 @@ public class BoardController {
     }
 
     @PutMapping("/{id}/stages/{stageId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Operation(summary = "Update stage status (active/inactive)", description = "Updates a stage within a specific board.")
     @ApiErrors({
             ErrorInfo.BOARD_NOT_FOUND,

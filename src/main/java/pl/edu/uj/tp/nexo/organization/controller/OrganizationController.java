@@ -42,6 +42,7 @@ public class OrganizationController {
         return organizationService.getOrganizationById(currentUser.getOrganization().getId());
     }
 
+    //should be removed?
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update my organization", description = "Updates the name of the authenticated user's organization.")
@@ -59,6 +60,7 @@ public class OrganizationController {
         return organizationService.updateOrganization(currentUser.getOrganization().getId(), request);
     }
 
+    //should be removed?
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
