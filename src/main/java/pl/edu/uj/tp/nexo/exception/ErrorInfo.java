@@ -17,12 +17,16 @@ public enum ErrorInfo {
     EMAIL_ALREADY_EXISTS(1004, HttpStatus.CONFLICT, "User with this email already exists"),
     INVALID_AUTH_TOKEN(1005, HttpStatus.UNAUTHORIZED, "Invalid or expired authentication token"),
 
-    // ------------------------------------------
-    // 2000 - 2999: Issues, Boards, Stages
-    // ------------------------------------------
-    ISSUE_NOT_FOUND(2001, HttpStatus.NOT_FOUND, "Issue not found"),
-    BOARD_NOT_FOUND(2002, HttpStatus.NOT_FOUND, "Board not found"),
-    STAGE_NOT_FOUND(2003, HttpStatus.NOT_FOUND, "Stage not found"),
+     // ------------------------------------------
+     // 2000 - 2999: Issues, Boards, Stages
+     // ------------------------------------------
+     ISSUE_NOT_FOUND(2001, HttpStatus.NOT_FOUND, "Issue not found"),
+     BOARD_NOT_FOUND(2002, HttpStatus.NOT_FOUND, "Board not found"),
+     STAGE_NOT_FOUND(2003, HttpStatus.NOT_FOUND, "Stage not found"),
+     EPIC_NOT_FOUND(2004, HttpStatus.NOT_FOUND, "Epic not found"),
+     INVALID_EPIC_TYPE(2005, HttpStatus.BAD_REQUEST, "The referenced issue is not an epic"),
+     EPIC_CIRCULAR_REFERENCE(2006, HttpStatus.BAD_REQUEST, "An epic cannot be linked to itself"),
+     EPIC_INVALID_STAGE(2007, HttpStatus.BAD_REQUEST, "Epics can only be assigned to stages of type: PREPARATION, TO_DO, IN_PROGRESS, or DONE"),
 
     // ------------------------------------------
     // 3000 - 3999: General errors, Validation, Others

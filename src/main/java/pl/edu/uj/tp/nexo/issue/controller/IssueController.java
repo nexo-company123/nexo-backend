@@ -65,6 +65,22 @@ public class IssueController {
         return issueService.getIssueByIdAndOrganization(id, currentUser.getOrganization().getId());
     }
 
+    @GetMapping("/by-epic/{epicId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @Operation(summary = "Get all issues linked to an epic", description = "Retrieves all issues that are linked to a specific epic.")
+    @ApiErrors({
+            ErrorInfo.ISSUE_NOT_FOUND,
+            ErrorInfo.INVALID_EPIC_TYPE,
+            ErrorInfo.INVALID_AUTH_TOKEN,
+            ErrorInfo.USER_HAS_UNAUTHORIZED_ROLE
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of issues linked to epic retrieved successfully")
+    })
+    public List<IssueResponse> getIssuesByEpic(@PathVariable Long epicId, @AuthenticationPrincipal User currentUser) {
+        return issueService.getIssuesByEpic(epicId, currentUser.getOrganization().getId());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -75,6 +91,9 @@ public class IssueController {
             ErrorInfo.STAGE_NOT_FOUND,
             ErrorInfo.ORGANIZATION_NOT_FOUND,
             ErrorInfo.ISSUE_NOT_FOUND,
+            ErrorInfo.INVALID_EPIC_TYPE,
+            ErrorInfo.EPIC_CIRCULAR_REFERENCE,
+            ErrorInfo.EPIC_INVALID_STAGE,
             ErrorInfo.INVALID_AUTH_TOKEN,
             ErrorInfo.USER_HAS_UNAUTHORIZED_ROLE
     })
@@ -93,6 +112,9 @@ public class IssueController {
             ErrorInfo.ISSUE_NOT_FOUND,
             ErrorInfo.USER_NOT_FOUND,
             ErrorInfo.STAGE_NOT_FOUND,
+            ErrorInfo.INVALID_EPIC_TYPE,
+            ErrorInfo.EPIC_CIRCULAR_REFERENCE,
+            ErrorInfo.EPIC_INVALID_STAGE,
             ErrorInfo.INVALID_AUTH_TOKEN,
             ErrorInfo.USER_HAS_UNAUTHORIZED_ROLE
     })

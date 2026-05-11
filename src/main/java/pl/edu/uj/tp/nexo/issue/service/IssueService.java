@@ -14,11 +14,14 @@ import pl.edu.uj.tp.nexo.issue.dto.CreateIssueRequest;
 import pl.edu.uj.tp.nexo.issue.dto.IssueResponse;
 import pl.edu.uj.tp.nexo.issue.dto.UpdateIssueRequest;
 import pl.edu.uj.tp.nexo.issue.entity.Issue;
+import pl.edu.uj.tp.nexo.issue.entity.IssueType;
 import pl.edu.uj.tp.nexo.issue.repository.IssueRepository;
 import pl.edu.uj.tp.nexo.organization.repository.OrganizationRepository;
 import pl.edu.uj.tp.nexo.organization.service.OrganizationNotFoundException;
 import pl.edu.uj.tp.nexo.user.repository.UserRepository;
 import pl.edu.uj.tp.nexo.user.service.UserNotFoundException;
+import pl.edu.uj.tp.nexo.exception.AppException;
+import pl.edu.uj.tp.nexo.exception.ErrorInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +94,11 @@ public class IssueService {
 
         var epic = request.getEpicId() != null ? issueRepository.findByIdAndOrganizationId(request.getEpicId(), organizationId).orElseThrow(() -> new IssueNotFoundException(request.getEpicId())) : null;
 
+        // Validate epic before creating issue
+        if (epic != null) {
+            validateEpicForLinking(epic, null);
+        }
+
         validateEpicStage(request.getType(), stage);
 
         Issue issue = Issue.builder()
@@ -148,6 +156,8 @@ public class IssueService {
         if (request.getEpicId() != null) {
             var epic = issueRepository.findByIdAndOrganizationId(request.getEpicId(), organizationId)
                     .orElseThrow(() -> new IssueNotFoundException(request.getEpicId()));
+            // Validate epic before linking
+            validateEpicForLinking(epic, id);
             issue.setEpic(epic);
         }
         if (request.getStartDate() != null) {
@@ -175,11 +185,48 @@ public class IssueService {
         issueRepository.delete(issue);
     }
 
-    private void validateEpicStage(pl.edu.uj.tp.nexo.issue.entity.IssueType type, Stage stage) {
-        if (type == pl.edu.uj.tp.nexo.issue.entity.IssueType.EPIC) {
+    /**
+     * Retrieves all issues linked to a specific epic
+     */
+    public List<IssueResponse> getIssuesByEpic(Long epicId, Long organizationId) {
+        // Verify epic exists and belongs to the organization
+        Issue epic = issueRepository.findByIdAndOrganizationId(epicId, organizationId)
+                .orElseThrow(() -> new IssueNotFoundException(epicId));
+
+        // Verify it's actually an epic
+        if (epic.getType() != IssueType.EPIC) {
+            throw new AppException(ErrorInfo.INVALID_EPIC_TYPE);
+        }
+
+        // Get all issues referencing this epic
+        return issueRepository.findAllByEpicIdAndOrganizationId(epicId, organizationId).stream()
+                .map(this::toIssueResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Validates that an epic can be linked to an issue.
+     * Checks:
+     * - Epic must be of type EPIC
+     * - Circular reference prevention
+     */
+    private void validateEpicForLinking(Issue epic, Long linkingIssueId) {
+        // Check if epic is actually an EPIC type
+        if (epic.getType() != IssueType.EPIC) {
+            throw new AppException(ErrorInfo.INVALID_EPIC_TYPE);
+        }
+
+        // Prevent circular reference: an epic cannot be linked to itself
+        if (linkingIssueId != null && epic.getId().equals(linkingIssueId)) {
+            throw new AppException(ErrorInfo.EPIC_CIRCULAR_REFERENCE);
+        }
+    }
+
+    private void validateEpicStage(IssueType type, Stage stage) {
+        if (type == IssueType.EPIC) {
             List<StageType> allowed = List.of(StageType.PREPARATION, StageType.TO_DO, StageType.IN_PROGRESS, StageType.DONE);
             if (!allowed.contains(stage.getType())) {
-                throw new IllegalArgumentException("Epics can only be assigned to: " + allowed);
+                throw new AppException(ErrorInfo.EPIC_INVALID_STAGE);
             }
         }
     }

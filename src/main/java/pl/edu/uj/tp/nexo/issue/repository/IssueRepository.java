@@ -13,4 +13,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long>, JpaSpecific
     List<Issue> findAllByOrganizationId(Long organizationId);
 
     Optional<Issue> findByIdAndOrganizationId(Long id, Long organizationId);
+
+    List<Issue> findAllByEpicIdAndOrganizationId(Long epicId, Long organizationId);
 }
